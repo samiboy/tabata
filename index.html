@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121212">
+  <title>Tabata Timer</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f4f5; --fg: #18181b; --muted: #52525b; --field: #ffffff; --line: #d4d4d8; --accent: #c62828;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #121212; --fg: #f4f4f5; --muted: #a1a1aa; --field: #1e1e1e; --line: #3f3f46; }
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; min-height: 100%; }
+    body { background: var(--bg); color: var(--fg); font: 18px/1.4 system-ui, sans-serif; }
+    main { min-height: 100vh; min-height: 100dvh; max-width: 480px; margin: 0 auto;
+      padding: 16px 16px max(16px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+    button { font: inherit; font-size: 22px; font-weight: 700; min-height: 64px; border: 0; border-radius: 12px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: default; }
+
+    /* Settings */
+    h1 { font-size: 26px; margin: 8px 0 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .row input { width: 96px; font: inherit; font-size: 22px; padding: 8px; text-align: center;
+      border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--fg); }
+    .unit { display: inline-block; width: 1.2em; color: var(--muted); font-size: 15px; }
+    #total { color: var(--muted); margin: 16px 0; }
+    #start { background: var(--accent); color: #fff; width: 100%; }
+    .note { color: var(--muted); font-size: 15px; }
+
+    /* Workout */
+    body.running { background: var(--phase); color: #fff; }
+    body.running #setup, body:not(.running) #workout { display: none; }
+    body[data-phase="prepare"] { --phase: #b45309; }
+    body[data-phase="work"] { --phase: #c62828; }
+    body[data-phase="rest"] { --phase: #2e7d32; }
+    body[data-phase="setRest"] { --phase: #1565c0; }
+    body[data-phase="done"] { --phase: #37474f; }
+    .display { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; gap: 8px; }
+    #phase { font-size: min(12vw, 8vh); font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+    #clock { font-size: min(56vw, 40vh); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    #clock.long { font-size: min(30vw, 28vh); }
+    body.paused #clock { opacity: .5; }
+    #info { font-size: min(7vw, 4.5vh); font-weight: 600; }
+    #left { font-size: min(5vw, 3.2vh); opacity: .85; }
+    .buttons { display: flex; gap: 12px; }
+    .buttons button { flex: 1; background: rgb(255 255 255 / .2); color: #fff; }
+  </style>
+</head>
+<body>
+  <main id="setup">
+    <h1>Tabata Timer</h1>
+    <form id="settings">
+      <label class="row">Prepare <span><input id="prepare" type="number" inputmode="numeric"> <span class="unit">s</span></span></label>
+      <label class="row">Work <span><input id="work" type="number" inputmode="numeric"> <span class="unit">s</span></span></label>
+      <label class="row">Rest <span><input id="rest" type="number" inputmode="numeric"> <span class="unit">s</span></span></label>
+      <label class="row">Rounds <span><input id="rounds" type="number" inputmode="numeric"> <span class="unit"></span></span></label>
+      <label class="row">Sets <span><input id="sets" type="number" inputmode="numeric"> <span class="unit"></span></span></label>
+      <label class="row" id="row-setRest">Rest between sets <span><input id="setRest" type="number" inputmode="numeric"> <span class="unit">s</span></span></label>
+    </form>
+    <p id="total"></p>
+    <button id="start" disabled>Loading…</button>
+    <p id="error" class="note" hidden>Could not load the voice. Check the connection, then reload the page.</p>
+    <p class="note">Your music or podcast keeps playing. Keep this page open. The screen stays on during the workout.</p>
+  </main>
+
+  <main id="workout">
+    <div class="display">
+      <div id="phase"></div>
+      <div id="clock"></div>
+      <div id="info"></div>
+      <div id="left"></div>
+    </div>
+    <div class="buttons">
+      <button id="pause">Pause</button>
+      <button id="stop">Stop</button>
+    </div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
